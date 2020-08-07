@@ -1,6 +1,8 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 
 namespace MongoDbApp
 {
@@ -9,13 +11,20 @@ namespace MongoDbApp
         static void Main(string[] args)
         {
             var db = new Mongo("AddressBook");
-            db.InsertRecord("Person", new Person
-            {
-                FirstName = "Maryam",
-                LastName = "Shojaie"
-            });
+            //db.InsertRecord("Person", new Person
+            //{
+            //    FirstName = "Maryam",
+            //    LastName = "Shojaie"
+            //});
 
-            Console.WriteLine("Inserted!");
+            //Console.WriteLine("Inserted!");
+
+            var list = db.GetAll<Person>("Person");
+            foreach (var item in list)
+            {
+                Console.WriteLine($"{item.Id:D}: {item.FirstName} {item.LastName}");
+            }
+
             Console.ReadLine();
         }
     }
@@ -44,6 +53,19 @@ namespace MongoDbApp
         {
             var collection = db.GetCollection<T>(table);
             collection.InsertOne(record);
+        }
+
+        public List<T> GetAll<T>(string table)
+        {
+            var collection = db.GetCollection<T>(table);
+            return collection.Find(new BsonDocument()).ToList();
+        }
+
+        public T FindById<T>(string table, Guid id)
+        {
+            var collection = db.GetCollection<T>(table);
+            var filter = Builders<T>.Filter.Eq("Id", id);
+            return collection.Find(filter).FirstOrDefault();
         }
     }
 }
