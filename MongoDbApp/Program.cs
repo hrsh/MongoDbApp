@@ -67,5 +67,13 @@ namespace MongoDbApp
             var filter = Builders<T>.Filter.Eq("Id", id);
             return collection.Find(filter).FirstOrDefault();
         }
+
+        public void Update<T>(string table, Guid id, T record)
+        {
+            var collection = db.GetCollection<T>(table);
+            collection.ReplaceOne(Builders<T>.Filter.Eq("Id", id), record, new ReplaceOptions { IsUpsert = true });
+        }
+
+
     }
 }
